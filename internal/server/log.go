@@ -1,9 +1,3 @@
-// log struct
-
-//record struct
-
-// 3 methods on log
-// - newlog, append and read
 package server
 
 import (
@@ -23,7 +17,7 @@ type Record struct {
 
 var OutofBounds = fmt.Errorf("Offset not found")
 
-func (l *Log) NewLog() *Log {
+func NewLog() *Log {
 	return &Log{}
 }
 
@@ -39,7 +33,7 @@ func (l *Log) Read(offset uint64) (Record, error) {
 	l.mu.Lock()
 	defer l.mu.Unlock()
 
-	if !(uint64(len(l.records)) < offset) {
+	if offset >= uint64(len(l.records)) {
 		return Record{}, OutofBounds
 	}
 
