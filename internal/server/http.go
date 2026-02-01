@@ -30,12 +30,17 @@ type ConsumeResponse struct {
 	Record Record `json:"record"`
 }
 
+type LogAllResponse struct {
+	Records []Record `json:"records"`
+}
+
 func NewHTTPServer(addr string) *http.Server {
 	httpsrv := newHTTPServer() // tbc
 	r := mux.NewRouter()
 
 	r.HandleFunc("/", httpsrv.handleProduce).Methods("POST")
 	r.HandleFunc("/", httpsrv.handleConsume).Methods("GET")
+	r.HandleFunc("/all", httpsrv.handleLogAll).Methods("GET")
 
 	return &http.Server{
 		Addr:    addr,
@@ -93,6 +98,28 @@ func (srv *httpServer) handleConsume(w http.ResponseWriter, r *http.Request) {
 	}
 
 	err = json.NewEncoder(w).Encode(res)
+
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+}
+
+func (srv *httpServer) handleLogAll(w http.ResponseWriter, r *http.Request) {
+
+	recs, err := srv.Log.ReadAll()
+
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	response := LogAllResponse{
+		Records: recs,
+	}
+
+	err = json.NewEncoder(w).Encode(response)
 
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)

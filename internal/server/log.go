@@ -40,3 +40,11 @@ func (l *Log) Read(offset uint64) (Record, error) {
 	return l.records[offset], nil
 
 }
+
+func (l *Log) ReadAll() ([]Record, error) {
+	l.mu.Lock()
+	defer l.mu.Unlock()
+	cpy := make([]Record, len(l.records))
+	copy(cpy, l.records)
+	return cpy, nil
+}
